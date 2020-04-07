@@ -93,6 +93,9 @@ def _log_combiner(files, out, burn_in, is_tree, resample=None):
 
 def merge_chains(chains: BEASTPosteriorDirFmt, burn_in: int,
                  resample: int = None) -> BEASTPosteriorDirFmt:
+    if len(burn_in) > 1 and len(burn_in) != len(chains):
+        raise ValueError("burn_in")
+
     CONTROL_FMT = chains[0].control.format
     md5sums = {c.control.view(CONTROL_FMT).md5sum() for c in chains}
     if len(md5sums) > 1:
@@ -100,10 +103,7 @@ def merge_chains(chains: BEASTPosteriorDirFmt, burn_in: int,
                          " were generated with different inputs/parameters/"
                          "priors, so they cannot be merged.")
 
-    if type(burn_in) is list:
-        if len(burn_in) != len(chains):
-            raise ValueError("burn_in")
-
+    if len(burn_in) > 1:
         logs_to_merge = [PosteriorLogFormat() for _ in chains]
         trees_to_merge = [NexusFormat() for _ in chains]
         # remove the burn_in first as the CLI doesn't allow these to differ

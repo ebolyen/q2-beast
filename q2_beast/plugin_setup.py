@@ -57,7 +57,7 @@ plugin.methods.register_function(
 plugin.methods.register_function(
     function=merge_chains,
     inputs={'chains': List[Chain[BEAST]]},
-    parameters={'burn_in': NONNEGATIVE_INT,
+    parameters={'burn_in': List[NONNEGATIVE_INT],
                 'resample': NONNEGATIVE_INT},
     outputs=[('posterior', Chain[BEAST])],
     input_descriptions={},
