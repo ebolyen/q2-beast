@@ -109,19 +109,20 @@ def merge_chains(chains: BEASTPosteriorDirFmt, burn_in: int,
         # remove the burn_in first as the CLI doesn't allow these to differ
         for chain, single_burn_in, out_trees, out_log in zip(
                 chains, burn_in, trees_to_merge, logs_to_merge):
-            _log_combiner(chain.log.view(chain.log.format),
+            _log_combiner([chain.log.view(chain.log.format)],
                           out=out_log, burn_in=single_burn_in, is_tree=False)
-            _log_combiner(chain.trees.view(chain.trees.format),
+            _log_combiner([chain.trees.view(chain.trees.format)],
                           out=out_trees, burn_in=single_burn_in, is_tree=True)
         burn_in = 0  # disable global burn-in
     else:
         logs_to_merge = [c.log.view(c.log.format) for c in chains]
         trees_to_merge = [c.trees.view(c.trees.format) for c in chains]
+        burn_in = burn_in[0]
 
     result = BEASTPosteriorDirFmt()
     result.control.write_data(chains[0].control.view(CONTROL_FMT),
                               view_type=CONTROL_FMT)
-    with result.ops.path_maker().open() as fh:
+    with result.ops.path_maker().open('w') as fh:
         fh.write('')  # intentionally empty file
 
     _log_combiner(logs_to_merge, out=result.log.path_maker(), burn_in=burn_in,
