@@ -23,7 +23,7 @@ def site_heterogeneous_hky(
         noncoding_regions: qiime2.Metadata,
         time: qiime2.NumericMetadataColumn,
         n_generations: int,
-        sample_every: int = 1000,
+        sample_every: int,
         print_every: int = None,
         time_uncertainty: qiime2.NumericMetadataColumn = None,
         use_gpu: bool = False,

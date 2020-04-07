@@ -48,9 +48,36 @@ plugin.methods.register_function(
                 'use_gpu': Bool,
                 'n_threads': NONZERO_INT},
     outputs=[('chain', Chain[BEAST])],
-    input_descriptions={},
-    parameter_descriptions={},
-    output_descriptions={},
+    input_descriptions={
+        'coding_regions': 'An alignment of concatenated open reading frames.',
+        'noncoding_regions': 'An alignment of concatenated non-coding regions.'
+    },
+    parameter_descriptions={
+        'time': 'The decimal date for when that sequence was collected.',
+        'time_uncertainty': 'Uncertainty in the collection time,'
+                            ' this should be in decimal years.',
+        'n_generations': 'The number of generations (or iterations) to run the'
+                         ' MCMC procedure for. Higher values are more likely'
+                         ' to result in samples from the posterior'
+                         ' distribution. Typical values are on the order of'
+                         ' tens of millions of generations.',
+        'sample_every': 'How many generations should occur between samples'
+                        ' which will form the chain. This is a thinning '
+                        ' parameter, and can be used to reduce autocorrelation'
+                        ' increasing your effective sample size.',
+        'print_every': 'How many generations should occur before printing to'
+                       ' stdout. This is a cosmetic feature, and by default'
+                       ' will match `sample_every`.',
+        'use_gpu': 'Whether to perform MCMC on a CUDA enabled GPU.',
+        'n_threads': 'The number of threads to use, TODO: this is not quite'
+                     ' accurate, as some extra math happens with partitions'
+    },
+    output_descriptions={
+        'chain': 'An output chain of (ideally) the posterior distribution for'
+                 ' the phylogenetic analysis. Multiple chains should be'
+                 ' analyzed to ensure that each chain has converged on the'
+                 ' posterior distribution.'
+    },
     name='',
     description='')
 
@@ -60,11 +87,25 @@ plugin.methods.register_function(
     parameters={'burn_in': List[NONNEGATIVE_INT],
                 'resample': NONNEGATIVE_INT},
     outputs=[('posterior', Chain[BEAST])],
-    input_descriptions={},
-    parameter_descriptions={},
-    output_descriptions={},
-    name='',
-    description='')
+    input_descriptions={
+        'chains': 'A list of BEAST chains to merge together.'
+    },
+    parameter_descriptions={
+        'burn_in': 'The number of generations (not samples!) to treat as the'
+                   ' warmup period for the MCMC procedure. The samples'
+                   ' collected from generations prior to this `burn_in` will'
+                   ' be discarded as they are not representative of the'
+                   ' posterior distribution. If a single value is given, then'
+                   ' all chains will be given the same burn-in.',
+        'resample': 'Will preform additional thinning on each chain before'
+                    ' merging. This value is in generations (not samples!)'
+                    ' and must be an even multiple of the original sampling'
+                    ' rate.'  # why can't BEAST just use iter and thin?
+    },
+    output_descriptions={
+        'posterior': 'A merged chain of posterior samples.'},
+    name='Merge multiple posterior chains, remove burn-in, and thin.',
+    description='Merge multiple posterior chains, remove burn-in, and thin.')
 
 plugin.methods.register_function(
     function=maximum_clade_credibility,
@@ -74,5 +115,8 @@ plugin.methods.register_function(
     input_descriptions={},
     parameter_descriptions={},
     output_descriptions={},
-    name='',
-    description='')
+    name='Create a Maximum Clade Credibility tree from BEAST.',
+    description='Calculate the Maximum Clade Credibility tree from a BEAST'
+                ' posterior distribution. Ensure that the chain used has'
+                ' properly converged before running, or this will fail to'
+                ' produce meaningful results.')
