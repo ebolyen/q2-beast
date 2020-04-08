@@ -9,7 +9,7 @@ ops_file
 
 time_unit
 sample:
-  id
+  Index
   seq_orf
   seq_nc
   time

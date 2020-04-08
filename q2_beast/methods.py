@@ -11,7 +11,7 @@ from q2_beast.formats import (BEASTPosteriorDirFmt, NexusFormat,
 
 
 def _get_template(name):
-    path = pkg_resources.resource_filename('q2_beast.analyses',
+    path = pkg_resources.resource_filename('q2_beast',
                                            'xml-templates')
     loader = jinja2.FileSystemLoader(searchpath=path)
     env = jinja2.Environment(loader=loader)
@@ -53,11 +53,12 @@ def site_heterogeneous_hky(
     time_series = time.to_series()
     uncertainty_series = time_uncertainty.to_series()
 
-    samples_df = pd.concat(orf_series, nc_series, time_series,
-                           uncertainty_series, axis='columns', join='inner')
+    samples_df = pd.concat([orf_series, nc_series, time_series,
+                            uncertainty_series], axis='columns', join='inner')
     samples_df.index.name = 'id'
     samples_df.columns = ['seq_orf', 'seq_nc', 'time', 'time_uncertainty']
-    samples = list(samples_df.itertuples())
+    samples_df = samples_df.replace({pd.np.nan: None})
+    samples = list(samples_df.itertuples(index=True))
 
     # Default print behavior
     if print_every is None:

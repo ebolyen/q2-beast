@@ -1,7 +1,7 @@
 import importlib
 
 from qiime2.plugin import (
-    Plugin, Properties, MetadataColumn, Numeric, Int, Range, Bool, List, Str)
+    Plugin, MetadataColumn, Numeric, Int, Range, Bool, List, Str)
 
 from q2_types.feature_data import FeatureData, AlignedSequence
 from q2_types.tree import Phylogeny
@@ -44,8 +44,8 @@ NONNEGATIVE_INT = Int % Range(0, None)
 plugin.methods.register_function(
     function=site_heterogeneous_hky,
     inputs={
-        'coding_regions': FeatureData[AlignedSequence % Properties('ORF')],
-        'noncoding_regions': FeatureData[AlignedSequence % Properties('NC')]},
+        'coding_regions': FeatureData[AlignedSequence],
+        'noncoding_regions': FeatureData[AlignedSequence]},
     parameters={'time': MetadataColumn[Numeric],
                 'time_uncertainty': MetadataColumn[Numeric],
                 'n_generations': NONZERO_INT,

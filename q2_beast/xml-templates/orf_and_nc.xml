@@ -10,9 +10,9 @@
 
 
 	<!-- The list of taxa to be analysed (can also include dates/ages).          -->
-	<taxa>
+	<taxa id="taxa">
 		{% for sample in samples %}
-		<taxon id="{{ sample.id }}">
+		<taxon id="{{ sample.Index }}">
 			<date value="{{ sample.time }}" direction="forwards" units="{{ time_unit }}" {{ 'uncertainty="%f"' % sample.time_uncertainty if sample.time_uncertainty }}/>
 		</taxon>
 	        {% endfor %}
@@ -24,7 +24,7 @@
 	<alignment id="alignment_orf" dataType="nucleotide">
 		{% for sample in samples %}
 		<sequence>
-			<taxon idref="{{ sample.id }}"/>
+			<taxon idref="{{ sample.Index }}"/>
 			{{ sample.seq_orf }}
 		</sequence>
 		{% endfor %}
@@ -36,7 +36,7 @@
 	<alignment id="alignment_nc" dataType="nucleotide">
 		{% for sample in samples %}
 		<sequence>
-			<taxon idref="{{ sample.id }}"/>
+			<taxon idref="{{ sample.Index }}"/>
 			{{ sample.seq_nc }}
 		</sequence>
 		{% endfor %}
