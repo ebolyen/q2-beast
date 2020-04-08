@@ -6,4 +6,4 @@ from q2_beast.formats import PosteriorLogFormat
 
 @plugin.register_transformer
 def _1(ff: PosteriorLogFormat) -> pd.DataFrame:
-    return pd.read_csv(str(ff), sep='\t', skip_blank_lines=True , comment='#')
+    return pd.read_csv(str(ff), sep='\t', skip_blank_lines=True, comment='#')

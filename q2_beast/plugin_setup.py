@@ -1,7 +1,7 @@
 import importlib
 
 from qiime2.plugin import (
-    Plugin, Properties, MetadataColumn, Numeric, Int, Range, Bool, List)
+    Plugin, Properties, MetadataColumn, Numeric, Int, Range, Bool, List, Str)
 
 from q2_types.feature_data import FeatureData, AlignedSequence
 from q2_types.tree import Phylogeny
@@ -130,9 +130,11 @@ plugin.methods.register_function(
 plugin.visualizers.register_function(
     function=traceplot,
     inputs={'chains': List[Chain[BEAST]]},
-    parameters={},
+    parameters={'params': List[Str]},
     input_descriptions={},
-    parameter_descriptions={},
+    parameter_descriptions={
+        'params': 'Additional parameter traces to plot. By default only the'
+                  ' log-likelihood is plotted.'},
     name='Create traceplots of BEAST chains.',
     description=''
 )
