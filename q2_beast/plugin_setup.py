@@ -1,3 +1,5 @@
+import importlib
+
 from qiime2.plugin import (
     Plugin, Properties, MetadataColumn, Numeric, Int, Range, Bool, List)
 
@@ -7,6 +9,7 @@ from q2_types.tree import Phylogeny
 import q2_beast
 from q2_beast.methods import (
     site_heterogeneous_hky, merge_chains, maximum_clade_credibility)
+from q2_beast.visualizations import traceplot
 from q2_beast.types import Chain, BEAST, MCC
 from q2_beast.formats import (
     PosteriorLogFormat, NexusFormat, BEASTControlFileFormat,
@@ -31,6 +34,9 @@ plugin.register_semantic_type_to_format(
     Chain[BEAST], artifact_format=BEASTPosteriorDirFmt)
 plugin.register_semantic_type_to_format(
     Phylogeny[MCC], artifact_format=NexusDirFmt)
+
+
+importlib.import_module('q2_beast.transformers')
 
 NONZERO_INT = Int % Range(1, None)
 NONNEGATIVE_INT = Int % Range(0, None)
@@ -120,3 +126,13 @@ plugin.methods.register_function(
                 ' posterior distribution. Ensure that the chain used has'
                 ' properly converged before running, or this will fail to'
                 ' produce meaningful results.')
+
+plugin.visualizers.register_function(
+    function=traceplot,
+    inputs={'chains': List[Chain[BEAST]]},
+    parameters={},
+    input_descriptions={},
+    parameter_descriptions={},
+    name='Create traceplots of BEAST chains.',
+    description=''
+)
