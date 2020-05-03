@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 import versioneer
 
 setup(
-    name='q2-phylogenomics',
+    name='q2-beast',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     license='BSD-3-Clause',
