@@ -1,14 +1,16 @@
 import importlib
 
 from qiime2.plugin import (
-    Plugin, MetadataColumn, Numeric, Int, Range, Bool, List, Str)
+    Plugin, MetadataColumn, Numeric, Int, Range, Bool, List, Str, Choices,
+    Float)
 
 from q2_types.feature_data import FeatureData, AlignedSequence
 from q2_types.tree import Phylogeny
 
 import q2_beast
 from q2_beast.methods import (
-    site_heterogeneous_hky, merge_chains, maximum_clade_credibility)
+    site_heterogeneous_hky, merge_chains, maximum_clade_credibility,
+    gtr_single_partition)
 from q2_beast.visualizations import traceplot
 from q2_beast.types import Chain, BEAST, MCC
 from q2_beast.formats import (
@@ -40,6 +42,66 @@ importlib.import_module('q2_beast.transformers')
 
 NONZERO_INT = Int % Range(1, None)
 NONNEGATIVE_INT = Int % Range(0, None)
+
+plugin.methods.register_function(
+    function=gtr_single_partition,
+    inputs={
+        'alignment': FeatureData[AlignedSequence]},
+    parameters={'time': MetadataColumn[Numeric],
+                'n_generations': NONZERO_INT,
+                'sample_every': NONZERO_INT,
+                'time_uncertainty': MetadataColumn[Numeric],
+                'base_freq': Str % Choices("estimated", "empirical"),
+                'site_gamma': Int % Range(0, 10, inclusive_end=True),
+                'site_invariant': Bool,
+                'clock': Str % Choices("ucln", "strict"),
+                'coalescent_model': Str % Choices("skygrid", "constant",
+                                                  "exponential"),
+                'skygrid_intervals': NONZERO_INT,
+                'skygrid_duration': Float % Range(0, None,
+                                                  inclusive_start=False),
+                'print_every': NONZERO_INT,
+                'use_gpu': Bool,
+                'n_threads': NONZERO_INT},
+    outputs=[('chain', Chain[BEAST])],
+    input_descriptions={
+        'alignment': 'The alignment to construct a tree with.',
+    },
+    parameter_descriptions={
+        'time': 'The decimal date for when that sequence was collected.',
+        'time_uncertainty': 'Uncertainty in the collection time,'
+                            ' this should be in decimal years.',
+        'n_generations': 'The number of generations (or iterations) to run the'
+                         ' MCMC procedure for. Higher values are more likely'
+                         ' to result in samples from the posterior'
+                         ' distribution. Typical values are on the order of'
+                         ' tens of millions of generations.',
+        'sample_every': 'How many generations should occur between samples'
+                        ' which will form the chain. This is a thinning '
+                        ' parameter, and can be used to reduce autocorrelation'
+                        ' increasing your effective sample size.',
+        'base_freq': '',
+        'site_gamma': '',
+        'site_invariant': '',
+        'clock': '',
+        'coalescent_model': '',
+        'skygrid_intervals': '',
+        'skygrid_duration': '',
+        'print_every': 'How many generations should occur before printing to'
+                       ' stdout. This is a cosmetic feature, and by default'
+                       ' will match `sample_every`.',
+        'use_gpu': 'Whether to perform MCMC on a CUDA enabled GPU.',
+        'n_threads': 'The number of threads to use, TODO: this is not quite'
+                     ' accurate, as some extra math happens with partitions'
+    },
+    output_descriptions={
+        'chain': 'An output chain of (ideally) the posterior distribution for'
+                 ' the phylogenetic analysis. Multiple chains should be'
+                 ' analyzed to ensure that each chain has converged on the'
+                 ' posterior distribution.'
+    },
+    name='',
+    description='')
 
 plugin.methods.register_function(
     function=site_heterogeneous_hky,
@@ -138,3 +200,17 @@ plugin.visualizers.register_function(
     name='Create traceplots of BEAST chains.',
     description=''
 )
+
+
+def not_real(output_dir: str, nope: int = None):
+    pass
+
+
+plugin.visualizers.register_function(
+    function=not_real,
+    inputs={},
+    parameters={'nope': Int},
+    input_descriptions={},
+    parameter_descriptions={},
+    name='',
+    description='')

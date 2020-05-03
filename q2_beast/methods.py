@@ -18,6 +18,89 @@ def _get_template(name):
     return env.get_template(name)
 
 
+def gtr_single_partition(
+        alignment: qiime2.Metadata,
+        time: qiime2.NumericMetadataColumn,
+        n_generations: int,
+        sample_every: int,
+        time_uncertainty: qiime2.NumericMetadataColumn = None,
+        base_freq: str = "estimated",
+        site_gamma: int = 4,
+        site_invariant: bool = True,
+        clock: str = 'ucln',
+        coalescent_model: str = 'skygrid',
+        skygrid_intervals: int = None,
+        skygrid_duration: float = None,
+        print_every: int = None,
+        use_gpu: bool = False,
+        n_threads: int = 1) -> BEASTPosteriorDirFmt:
+
+    if coalescent_model == 'skygrid':
+        if skygrid_duration is None or skygrid_intervals is None:
+            raise ValueError("skygrid not parameterized (TODO: better error)")
+
+    # Parallelization options
+    beast_call = ['beast']
+    if use_gpu:
+        if n_threads != 1:
+            raise ValueError
+        beast_call += ['-beagle_GPU', '-beagle_cuda', '-beagle_instances', '1']
+    else:
+        beast_call += ['-beagle_CPU', '-beagle_SSE',
+                       '-beagle_instances', str(n_threads)]
+
+    # Set up directory format where BEAST will write everything
+    result = BEASTPosteriorDirFmt()
+    control_file = str(result.control.path_maker())
+
+    ops_file = str(result.ops.path_maker().relative_to(result.path))
+    log_file = str(result.log.path_maker().relative_to(result.path))
+    trees_file = str(result.trees.path_maker().relative_to(result.path))
+
+    # Setup up samples for templating into control file
+    seq_series = alignment.get_column('Sequence').to_series()
+    time_series = time.to_series()
+
+    if time_uncertainty is not None:
+        uncertainty_series = time_uncertainty.to_series()
+    else:
+        uncertainty_series = time_series.copy()
+        uncertainty_series[...] = None
+
+    samples_df = pd.concat([seq_series, time_series, uncertainty_series],
+                           axis='columns', join='inner')
+    samples_df.index.name = 'id'
+    samples_df.columns = ['seq', 'time', 'time_uncertainty']
+    samples_df = samples_df.replace({pd.np.nan: None})
+    samples = list(samples_df.itertuples(index=True))
+
+    # Default print behavior
+    if print_every is None:
+        print_every = sample_every
+
+    # Generate control file for BEAST
+    template_kwargs = dict(trees_file=trees_file, ops_file=ops_file,
+                           log_file=log_file, sample_every=sample_every,
+                           print_every=print_every,
+                           n_generations=n_generations, time_unit='years',
+                           samples=samples, base_freq=base_freq,
+                           site_gamma=site_gamma,
+                           site_invariant=site_invariant, clock=clock,
+                           coalescent_model=coalescent_model,
+                           skygrid_duration=skygrid_duration,
+                           skygrid_intervals=skygrid_intervals)
+
+    template = _get_template("gtr_single_partition.xml")
+    template.stream(**template_kwargs).dump(control_file)
+
+    beast_call += [str(control_file)]
+
+    # Execute
+    subprocess.run(beast_call, check=True, cwd=result.path)
+
+    return result
+
+
 def site_heterogeneous_hky(
         coding_regions: qiime2.Metadata,
         noncoding_regions: qiime2.Metadata,
