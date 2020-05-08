@@ -11,7 +11,7 @@ import q2_beast
 from q2_beast.methods import (
     site_heterogeneous_hky, merge_chains, maximum_clade_credibility,
     gtr_single_partition)
-from q2_beast.visualizations import traceplot
+from q2_beast.visualizations import traceplot, auspice
 from q2_beast.types import Chain, BEAST, MCC
 from q2_beast.formats import (
     PosteriorLogFormat, NexusFormat, BEASTControlFileFormat,
@@ -198,6 +198,17 @@ plugin.visualizers.register_function(
         'params': 'Additional parameter traces to plot. By default only the'
                   ' log-likelihood is plotted.'},
     name='Create traceplots of BEAST chains.',
+    description=''
+)
+
+
+plugin.visualizers.register_function(
+    function=auspice,
+    inputs={'mcc': Phylogeny[MCC]},
+    parameters={'time': MetadataColumn[Numeric]},
+    input_descriptions={},
+    parameter_descriptions={},
+    name='',
     description=''
 )
 

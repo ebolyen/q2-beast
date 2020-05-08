@@ -1,0 +1,35 @@
+{
+    "title": "",
+    "color_options": {
+        "posterior": {
+            "menuItem": "posterior",
+            "legendTitle": "posterior",
+            "type": "continuous"
+        },
+        "rate_median": {
+            "menuItem": "rate_median",
+            "legendTitle": "rate_median",
+            "type": "continuous"
+        },
+        "num_date": {
+            "menuItem": "Sampling Date",
+            "legendTitle": "Sampling Date",
+            "type": "continuous"
+        },
+        "rate": {
+            "menuItem": "rate",
+            "legendTitle": "rate",
+            "type": "continuous"
+        }
+    },
+    "defaults": {
+        "colorBy": "num_date"
+    },
+    "maintainer": [
+        "",
+        ""
+    ],
+    "panels": [
+        "tree"
+    ]
+}
